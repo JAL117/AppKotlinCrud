@@ -89,7 +89,7 @@ class EditSingleProductViewModel(private val apiService: ApiService) : ViewModel
                     uriToMultipart(uri = it, context = context, fieldName = "image")
                 }
 
-                // Imprime los valores
+
                 Log.d("EditSingleProductViewModel", "Nombre: ${nombre}")
                 Log.d("EditSingleProductViewModel", "Nuevo Nombre: ${nuevoNombre}")
                 Log.d("EditSingleProductViewModel", "Precio: ${precio}")

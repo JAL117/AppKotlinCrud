@@ -3,25 +3,11 @@ package com.example.moviles.ui.Products.ui
 import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,114 +35,154 @@ fun EditDeleteProductScreen(navController: NavHostController) {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Editar / Eliminar Productos",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (viewModel.isLoading) {
-                CircularProgressIndicator()
-            }
-            if (viewModel.error != null) {
-                Text(text = "Error: ${viewModel.error}", color = MaterialTheme.colorScheme.error)
-            }
-            if(viewModel.deleteSuccess){
-                Text(text = "Producto eliminado con éxito", color = MaterialTheme.colorScheme.primary)
-            }
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+        // BoxWithConstraints para adaptar el layout según el tamaño de pantalla
+        BoxWithConstraints {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                items(viewModel.products) { product ->
-                    EditableProductCard(product, navController,viewModel)
+                Text(
+                    text = "Editar / Eliminar Productos",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                when {
+                    viewModel.isLoading -> {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    viewModel.error != null -> {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Error: ${viewModel.error}",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    else -> {
+                        if (viewModel.deleteSuccess) {
+                            Text(
+                                text = "Producto eliminado con éxito",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        LazyColumn(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(viewModel.products) { product ->
+                                EditableProductCard(product, navController, viewModel)
+                            }
+                        }
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            ) {
-                Text(text = "Regresar", color = MaterialTheme.colorScheme.onSecondary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text(
+                        text = "Regresar",
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     }
 }
+
 @Composable
-fun EditableProductCard(product: ProductResponse, navController: NavHostController, viewModel: EditDeleteProductsViewModel) {
+fun EditableProductCard(
+    product: ProductResponse,
+    navController: NavHostController,
+    viewModel: EditDeleteProductsViewModel
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        // BoxWithConstraints para ajustar dinámicamente el tamaño de la imagen según el ancho disponible
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val imageSize = if (maxWidth < 250.dp) 100.dp else 140.dp
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Imagen en la parte superior
                 val imageBitmap = product.imagen?.let {
                     val decodedBytes = Base64.decode(it, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes,0,decodedBytes.size).asImageBitmap()
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size).asImageBitmap()
                 }
-                if (imageBitmap != null){
+                if (imageBitmap != null) {
                     Image(
-                        bitmap =  imageBitmap,
+                        bitmap = imageBitmap,
                         contentDescription = "Product Image",
                         modifier = Modifier
-                            .size(60.dp)
-                            .padding(end = 16.dp),
+                            .size(imageSize)
+                            .padding(bottom = 8.dp),
                         contentScale = ContentScale.Crop
                     )
                 }
-                Column {
-                    Text(
-                        text = product.nombre,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Precio: ${product.precio}",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Button(
-                    onClick = {
-                        navController.navigate("edit_single_product_screen/${product.id}")
-                    },
-
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                // Texto informativo
+                Text(
+                    text = product.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Precio $: ${product.precio}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                // Botones de acción
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Text(text = "Editar",  color = MaterialTheme.colorScheme.onPrimary)
-                }
-
-
-                Spacer(modifier = Modifier.padding(8.dp))
-                Button(
-                    onClick = {
-                        viewModel.deleteProduct(product.nombre)
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                ) {
-                    Text(text = "Eliminar", color = MaterialTheme.colorScheme.onError)
+                    Button(
+                        onClick = {
+                            navController.navigate("edit_single_product_screen/${product.id}")
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text(text = "Editar", color = MaterialTheme.colorScheme.onPrimary)
+                    }
+                    Button(
+                        onClick = { viewModel.deleteProduct(product.nombre) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(text = "Eliminar", color = MaterialTheme.colorScheme.onError)
+                    }
                 }
             }
         }

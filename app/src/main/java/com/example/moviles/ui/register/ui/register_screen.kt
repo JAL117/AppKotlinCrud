@@ -1,33 +1,37 @@
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+package com.example.moviles.ui.register.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.verticalScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.moviles.ui.register.data.RegisterModel
 import com.example.moviles.ui.register.ui.RegisterViewModel
 import com.example.moviles.ui.register.ui.RegisterViewModelFactory
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.moviles.apiService.ApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.painterResource
+import com.example.moviles.R
+
 @Composable
 fun RegisterScreen(
     navigateToLogin: () -> Unit
-){
+) {
     //Instancia de retrofit
     val apiService = Retrofit.Builder()
         .baseUrl("http://192.168.0.27:3000")
@@ -44,8 +48,8 @@ fun RegisterScreen(
     )
 
     val navigateToLoginState by registerViewModel.navigateToLogin.collectAsState()
-    if (navigateToLoginState){
-        LaunchedEffect(Unit){
+    if (navigateToLoginState) {
+        LaunchedEffect(Unit) {
             navigateToLogin()
         }
     }
@@ -57,89 +61,178 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+            .padding(24.dp)  // Aumenta el padding para más espacio alrededor
+            .verticalScroll(rememberScrollState()), // Agrega scroll para pantallas pequeñas
+        verticalArrangement = Arrangement.spacedBy(16.dp), // Espacio entre elementos
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = registerViewModel.name,
-            onValueChange = {registerViewModel.onNameChanged(it)},
-            label = { Text("Nombre") },
-            isError = registerViewModel.errorName != null,
-            modifier = Modifier.fillMaxWidth()
+        Text(
+            text = "Crear cuenta", // Título más llamativo
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
         )
-        if (registerViewModel.errorName != null){
-            Text(
-                text = registerViewModel.errorName!!,
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.Start)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
+
+        Spacer(modifier = Modifier.height(8.dp)) // Espacio antes de los campos
+
+        InputField(
+            value = registerViewModel.name,
+            onValueChange = { registerViewModel.onNameChanged(it) },
+            label = "Nombre",
+            errorMessage = registerViewModel.errorName
+        )
+
+        InputField(
             value = registerViewModel.email,
             onValueChange = { registerViewModel.onEmailChanged(it) },
-            label = { Text("Email") },
-            isError = registerViewModel.errorEmail != null,
-            modifier = Modifier.fillMaxWidth()
+            label = "Email",
+            keyboardType = KeyboardType.Email,
+            errorMessage = registerViewModel.errorEmail
         )
-        if (registerViewModel.errorEmail != null){
-            Text(
-                text = registerViewModel.errorEmail!!,
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.Start)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
+
+        PasswordField(
             value = registerViewModel.password,
-            onValueChange = {registerViewModel.onPasswordChanged(it)},
-            label = { Text("Contraseña") },
-            isError = registerViewModel.errorPassword != null,
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = { registerViewModel.onPasswordChanged(it) },
+            label = "Contraseña",
+            errorMessage = registerViewModel.errorPassword
         )
-        if (registerViewModel.errorPassword != null){
-            Text(
-                text = registerViewModel.errorPassword!!,
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.Start)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
+
+        PasswordField(
             value = registerViewModel.confirmPassword,
-            onValueChange = {registerViewModel.onConfirmPasswordChanged(it)},
-            label = { Text("Confirmar contraseña") },
-            isError = registerViewModel.errorConfirmPassword != null,
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = { registerViewModel.onConfirmPasswordChanged(it) },
+            label = "Confirmar contraseña",
+            errorMessage = registerViewModel.errorConfirmPassword,
+            imeAction = ImeAction.Done // Cierra el teclado después de este campo
         )
-        if (registerViewModel.errorConfirmPassword != null){
-            Text(
-                text = registerViewModel.errorConfirmPassword!!,
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.Start)
-            )
-        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = {registerViewModel.onRegisterButtonClicked()},
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !loading
-        ) {
-            if (loading){
-                Text(text = "Cargando...")
-            }else{
-                Text(text = "Registrarse")
-            }
+        RegisterButton(
+            onClick = { registerViewModel.onRegisterButtonClicked() },
+            loading = loading
+        )
 
+        if (showMessageError) {
+            ErrorMessage(message = messageError)
         }
-        if (showMessageError){
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    errorMessage: String? = null,
+    imeAction: ImeAction = ImeAction.Next
+) {
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            isError = errorMessage != null,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp), // Bordes más redondeados
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                errorBorderColor = MaterialTheme.colorScheme.error
+            )
+        )
+
+        if (errorMessage != null) {
             Text(
-                text = messageError,
-                color = Color.Red,
-                modifier = Modifier.padding(top = 8.dp)
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
             )
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasswordField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    errorMessage: String? = null,
+    imeAction: ImeAction = ImeAction.Next
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            isError = errorMessage != null,
+            modifier = Modifier.fillMaxWidth(),
+
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp), // Bordes más redondeados
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        painter = if (passwordVisible) painterResource(id = R.drawable.ic_visibility_off) else painterResource(id = R.drawable.ic_visibility),
+                        contentDescription = description
+                    )
+                }
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                errorBorderColor = MaterialTheme.colorScheme.error
+            )
+        )
+
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun RegisterButton(
+    onClick: () -> Unit,
+    loading: Boolean
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp)),
+        enabled = !loading,
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        if (loading) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
+        } else {
+            Text(
+                text = "Registrarse",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun ErrorMessage(message: String) {
+    Text(
+        text = message,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.padding(top = 8.dp)
+    )
 }

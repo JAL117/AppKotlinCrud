@@ -1,56 +1,44 @@
 package com.example.moviles.ui.login.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.moviles.R
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel = viewModel(), navController: NavHostController = rememberNavController()) {
+fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(),
+    navController: NavHostController = rememberNavController()
+) {
     val scope = rememberCoroutineScope()
     val navigateToHome by viewModel.navigateToHome.collectAsState(initial = false)
+
     LaunchedEffect(navigateToHome) {
         if (navigateToHome) {
-            navController.navigate("home_screen")
+            navController.navigate("home_screen") {
+                // Evitar volver a la pantalla de login con el botón "Atrás"
+                popUpTo("login_screen") { inclusive = true }
+            }
         }
     }
 
@@ -61,6 +49,7 @@ fun LoginScreen(viewModel: LoginViewModel = viewModel(), navController: NavHostC
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(16.dp) // Añade un padding general
         ) {
             Login(Modifier.align(Alignment.Center), viewModel, navController)
         }
@@ -71,12 +60,23 @@ fun LoginScreen(viewModel: LoginViewModel = viewModel(), navController: NavHostC
 fun Login(modifier: Modifier, viewModel: LoginViewModel, navController: NavHostController) {
     Column(
         modifier = modifier
-            .padding(16.dp)
+            .fillMaxWidth() // Permite que la columna ocupe el ancho completo disponible
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp) // Aumenta el espacio entre elementos
     ) {
-        HeaderImage(Modifier.padding(bottom = 16.dp))
+        HeaderImage(Modifier.size(120.dp)) // Tamaño fijo para la imagen
+        Text(
+            text = "Bienvenido", // Título más llamativo
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary // Color del tema
+        )
+        Text(
+            text = "Inicia sesión para continuar", // Subtítulo
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f) // Color atenuado
+        )
         EmailField(viewModel)
         PasswordField(viewModel)
         LoginButton(viewModel)
@@ -92,7 +92,7 @@ fun EmailField(viewModel: LoginViewModel) {
         value = viewModel.email,
         onValueChange = { viewModel.onEmailChanged(it) },
         modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = "Email", color = MaterialTheme.colorScheme.onBackground) },
+        label = { Text(text = "Correo electrónico") }, // Label más amigable
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         singleLine = true,
         maxLines = 1,
@@ -107,7 +107,7 @@ fun EmailField(viewModel: LoginViewModel) {
             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
             errorBorderColor = MaterialTheme.colorScheme.error,
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(8.dp) // Bordes más suaves
     )
 }
 
@@ -120,17 +120,20 @@ fun PasswordField(viewModel: LoginViewModel) {
         value = viewModel.password,
         onValueChange = { viewModel.onPasswordChanged(it) },
         modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = "Password", color = MaterialTheme.colorScheme.onBackground) },
+        label = { Text(text = "Contraseña") }, // Label más amigable
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         singleLine = true,
         maxLines = 1,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
-            val description = if (passwordVisible) "Hide password" else "Show password"
-            IconButton(onClick = {passwordVisible = !passwordVisible}){
-                Image(
-                    painter = if (passwordVisible) painterResource(id = R.drawable.ic_visibility_off) else painterResource(id = R.drawable.ic_visibility),
-                    contentDescription = description
+            val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(
+                    painter = if (passwordVisible) painterResource(id = R.drawable.ic_visibility_off) else painterResource(
+                        id = R.drawable.ic_visibility
+                    ),
+                    contentDescription = description,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) // Icono más sutil
                 )
             }
         },
@@ -139,7 +142,7 @@ fun PasswordField(viewModel: LoginViewModel) {
             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
             errorBorderColor = MaterialTheme.colorScheme.error,
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(8.dp) // Bordes más suaves
     )
 }
 
@@ -154,10 +157,19 @@ fun LoginButton(viewModel: LoginViewModel) {
         },
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp),
-        shape = RoundedCornerShape(12.dp)
+            .height(56.dp) // Altura ligeramente mayor
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp)), // Sombra sutil
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
     ) {
-        Text(text = "Iniciar sesión", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.bodyMedium.fontSize)
+        Text(
+            text = "Iniciar sesión",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp // Tamaño de fuente más grande
+        )
     }
 }
 

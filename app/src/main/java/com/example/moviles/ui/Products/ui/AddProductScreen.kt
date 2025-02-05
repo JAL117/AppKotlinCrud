@@ -10,14 +10,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -62,13 +65,7 @@ fun AddProductScreen(navController: NavHostController) {
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Permission is granted.
-        } else {
-            // Permission is denied
-        }
-    }
+    ) {}
 
     val resetFields: () -> Unit = {
         productName = ""
@@ -86,145 +83,116 @@ fun AddProductScreen(navController: NavHostController) {
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.Center // Cambiado a Center
         ) {
-
             Text(
                 text = "Agregar Nuevo Producto",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (viewModel.isLoading) {
-                CircularProgressIndicator()
+            if (viewModel.isLoading) CircularProgressIndicator()
+            viewModel.error?.let {
+                Text(text = "Error: $it", color = MaterialTheme.colorScheme.error)
             }
-
-            if (viewModel.error != null) {
-                Text(text = "Error: ${viewModel.error}", color = MaterialTheme.colorScheme.error)
-            }
-
             if (viewModel.success) {
                 Text(text = "Producto agregado con éxito", color = MaterialTheme.colorScheme.primary)
-                LaunchedEffect(Unit) {
-                    resetFields()
-                }
+                LaunchedEffect(Unit) { resetFields() }
             }
 
-
-            Column(
+            OutlinedTextField(
+                value = productName,
+                onValueChange = { productName = it },
+                label = { Text("Nombre del Producto") },
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ){
-                OutlinedTextField(
-                    value = productName,
-                    onValueChange = { productName = it },
-                    label = { Text("Nombre del Producto", color = MaterialTheme.colorScheme.onBackground) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
-                    shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp)
+            )
 
-                )
+            OutlinedTextField(
+                value = productPrice,
+                onValueChange = {
+                    // Solo permitir números y un punto decimal
+                    val newPrice = it.filter { char -> char.isDigit() || char == '.' }
 
-                OutlinedTextField(
-                    value = productPrice,
-                    onValueChange = { productPrice = it },
-                    label = { Text("Precio del Producto", color = MaterialTheme.colorScheme.onBackground) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-
-                if (productImageUri != null) {
-                    Image(
-                        painter = rememberImagePainter(data = productImageUri),
-                        contentDescription = "Product Image",
-                        modifier = Modifier
-                            .size(150.dp)
-                            .align(Alignment.CenterHorizontally)
-                        ,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Button(
-                        onClick = {
-                            val intent = Intent(
-                                Intent.ACTION_PICK,
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                            )
-                            galleryLauncher.launch(intent)
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text(text = "Seleccionar Imagen", color = MaterialTheme.colorScheme.onPrimary)
+                    // Asegurarse de que solo haya un punto decimal
+                    if (newPrice.count { char -> char == '.' } <= 1) {
+                        productPrice = newPrice
                     }
-
-                    Button(
-                        onClick = {
-                            if (ActivityCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CAMERA
-                                )
-                                != android.content.pm.PackageManager.PERMISSION_GRANTED
-                            ) {
-                                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            } else {
-                                cameraLauncher.launch(null)
-                            }
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-
-                    ) {
-                        Text(text = "Tomar Foto", color = MaterialTheme.colorScheme.onPrimary)
-                    }
-                }
-
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    viewModel.addProduct(productName, productPrice, productImageUri, context)
                 },
+                label = { Text("Precio del Producto") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text(
-                    text = "Agregar Producto",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+
+            productImageUri?.let {
+                Image(
+                    painter = rememberImagePainter(data = it),
+                    contentDescription = "Product Image",
+                    modifier = Modifier
+                        .size(150.dp)
+                        .align(Alignment.CenterHorizontally),
+                    contentScale = ContentScale.Crop
                 )
             }
-            Button(
-                onClick = { navController.popBackStack() },
+
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(
-                    text = "Regresar",
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                Button(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        galleryLauncher.launch(intent)
+                    },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Seleccionar Imagen")
+                }
+
+                Button(
+                    onClick = {
+                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        } else {
+                            cameraLauncher.launch(null)
+                        }
+                    },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Tomar Foto")
+                }
+            }
+
+
+            // Botones en la parte inferior
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly // Distribuye el espacio uniformemente
+            ) {
+                Button(
+                    onClick = { navController.popBackStack() },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                    modifier = Modifier.weight(1f) // Hace que los botones ocupen el mismo espacio
+                ) {
+                    Text("Regresar al menu", fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.width(8.dp)) // Espacio entre botones
+
+                Button(
+                    onClick = {
+                        viewModel.addProduct(productName, productPrice, productImageUri, context)
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
+                    modifier = Modifier.weight(1f) // Hace que los botones ocupen el mismo espacio
+                ) {
+                    Text("Agregar Producto", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

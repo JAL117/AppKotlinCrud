@@ -1,6 +1,6 @@
 package com.example.moviles
 
-import RegisterScreen
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,14 +20,18 @@ import com.example.moviles.ui.Products.ui.ListProductsScreen
 import com.example.moviles.ui.login.ui.LoginScreen
 import com.example.moviles.ui.theme.MovilesTheme
 import com.example.moviles.ui.Home.ui.HomeScreen
+import com.example.moviles.ui.register.ui.RegisterScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // Usa el tema MovilesTheme que definiste
             MovilesTheme {
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
+
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
@@ -35,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         composable("login_screen") {
                             LoginScreen(navController = navController)
                         }
-                        composable("register_screen"){
+                        composable("register_screen") {
                             RegisterScreen(navigateToLogin = {
                                 navController.navigate("login_screen")
                             })
@@ -54,9 +58,14 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(
                             route = "edit_single_product_screen/{productId}",
-                            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+                            arguments = listOf(navArgument("productId") {
+                                type = NavType.StringType
+                            })
                         ) { backStackEntry ->
-                            EditSingleProductScreen(navController = navController, productId = backStackEntry.arguments?.getString("productId") )
+                            EditSingleProductScreen(
+                                navController = navController,
+                                productId = backStackEntry.arguments?.getString("productId")
+                            )
                         }
                     }
                 }

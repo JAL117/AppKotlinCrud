@@ -1,28 +1,19 @@
 package com.example.moviles.ui.Home.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -36,107 +27,100 @@ fun HomeScreen(navController: NavHostController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
+                .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center // Cambiado a Center
         ) {
-            Button(
-                onClick = { navController.navigate("add_product_screen") },
+            Text(
+                text = "Administración de Medicamentos",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp, // Aumentado el tamaño de la fuente para mejor legibilidad
+                textAlign = TextAlign.Center, // Centrado el texto
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Agregar Producto",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(Modifier.padding(4.dp))
-                Text(
-                    text = "Agregar Producto",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
+                    .fillMaxWidth() // Para que ocupe todo el ancho disponible
+                    .padding(bottom = 32.dp) // Margen inferior
+            )
 
-            Button(
-                onClick = { navController.navigate("list_products_screen") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.List,
-                    contentDescription = "Listar Productos",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(Modifier.padding(4.dp))
-                Text(
-                    text = "Listar Productos",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
+            //Espacio entre el titulo y los botones
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = { navController.navigate("edit_delete_product_screen") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = "Editar / Eliminar Producto",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(Modifier.padding(4.dp))
-                Text(
-                    text = "Editar / Eliminar Producto",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
+            HomeButton(
+                text = "Agregar Medicamento",
+                icon = Icons.Filled.Add,
+                color = MaterialTheme.colorScheme.primary,
+                textColor = MaterialTheme.colorScheme.onPrimary
+            ) { navController.navigate("add_product_screen") }
 
-            Button(
-                onClick = {
-                    navController.navigate("login_screen") {
-                        popUpTo("login_screen") {
-                            inclusive = true
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(30.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+            Spacer(modifier = Modifier.height(16.dp)) // Espacio entre botones
+
+            HomeButton(
+                text = "Listar Medicamentos",
+                icon = Icons.Filled.List,
+                color = MaterialTheme.colorScheme.primary,
+                textColor = MaterialTheme.colorScheme.onPrimary
+            ) { navController.navigate("list_products_screen") }
+
+            Spacer(modifier = Modifier.height(16.dp)) // Espacio entre botones
+
+            HomeButton(
+                text = "Editar / Eliminar",
+                icon = Icons.Filled.Settings,
+                color = MaterialTheme.colorScheme.primary,
+                textColor = MaterialTheme.colorScheme.onPrimary
+            ) { navController.navigate("edit_delete_product_screen") }
+
+            Spacer(modifier = Modifier.height(16.dp)) // Espacio entre botones
+
+            HomeButton(
+                text = "Salir",
+                icon = Icons.Filled.ExitToApp,
+                color = MaterialTheme.colorScheme.secondary,
+                textColor = MaterialTheme.colorScheme.onSecondary
             ) {
-                Icon(
-                    imageVector = Icons.Filled.ExitToApp,
-                    contentDescription = "Salir",
-                    tint = MaterialTheme.colorScheme.onSecondary
-                )
-                Spacer(Modifier.padding(4.dp))
-                Text(
-                    text = "Salir",
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
+                navController.navigate("login_screen") {
+                    popUpTo("login_screen") { inclusive = true }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun HomeButton(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    textColor: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = text,
+                tint = textColor,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
         }
     }
 }
