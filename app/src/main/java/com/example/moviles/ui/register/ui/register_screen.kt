@@ -34,7 +34,7 @@ fun RegisterScreen(
 ) {
     //Instancia de retrofit
     val apiService = Retrofit.Builder()
-        .baseUrl("http://192.168.0.27:3000")
+        .baseUrl("http://10.1.0.247:3000")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ApiService::class.java)

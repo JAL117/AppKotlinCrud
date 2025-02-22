@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Moviles"
 include(":app")
- 

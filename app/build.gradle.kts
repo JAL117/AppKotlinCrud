@@ -1,6 +1,8 @@
 plugins {
-    alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.android.application")
+    id("com.google.gms.google-services")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -39,15 +41,17 @@ android {
     buildFeatures {
         compose = true
     }
+    //Opcional, Si no usas
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    buildToolsVersion = "35.0.0"
+    // Quitar esta línea porque no se usa mas
+    //buildToolsVersion = "35.0.0"
 }
 
 dependencies {
@@ -66,16 +70,14 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("androidx.activity:activity-compose:1.8.1")
     implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material3:material3:1.2.0")
 
-   //APi
+    //APi
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -84,4 +86,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //Push notification
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging-ktx:23.2.1") // Última versión recomendada
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    implementation("androidx.core:core-ktx:1.12.0")
 }
